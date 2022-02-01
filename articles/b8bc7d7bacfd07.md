@@ -1,34 +1,98 @@
 ---
-title: "た、たたたTypeScriptさん！？と思った話"
-emoji: "💬"
+title: "TypeScriptとインデックスシグネチャの話"
+emoji: "🗂"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["typescript"]
-published: false
+published: true
 ---
 
-# TypeScript を触っていてその仕様の多さ、わからなさに触れた
+## インデックスシグネチャとは
 
-他人が書いた型定義を見て「こう書けるのか」「これは便利」という発見をすることがあっのと、[type-challenges](https://github.com/type-challenges/type-challenges)を解いていて「なにこれ！？」と思うことが多かったので、今回は迷子になりがちな TypeScript の言語仕様についていくつかピックアップしたいと思います。
+オブジェクトなどのデータ構造に添字でアクセスする仕組みのことです。
 
-## Tuple 型の T[number]について
+## JavaScript のインデックスシグネチャ
 
-[type-challenges](https://github.com/type-challenges/type-challenges)の`easy`で早速出てきた Tuple 型について、一見不思議な書き方に見える type を発見しました。
+`JavaScript` の `Object` では参照を保持し、下記のように文字列で値にアクセスすることができます。
 
-## never の使いどころ
-
-`void`と`never`は戻り値がありません。この二つの違いは、関数が終了するかが異なります。
-void は関数が最後まで実行されるという意味で、never は関数の処理が中断または永遠に続くことを意味しています。
-文字で書かれると、void と never が違うことはわかりましたが、`never`の使い所ってどこなの？というと、素直に書けば以下のような関数の返り値に使えます。
-
-```typescript
-// throw文により最後まで到達しない
-const throeError = (message: string): never => throw new Error(message);
-
-// 無限ループ
-// while(true)は no-constant-condition に引っかかるのでこの書き方にした
-export const infinity = (): never => for (;;) console.log('infinity')
+```javascript
+const fruitsColor = {
+  orange: "orange",
+  melon: "green",
+  peach: "pink",
+};
+console.log(fruits["melon"]); // green
 ```
 
-他の使い道としては、既存の型の中で Optional な型を never にして使えなくするという使い方をします。
+また、`JavaScript` はインデックスシグネチャにオブジェクトを渡すと場合、暗黙的に `toString` を呼び出します。
 
-https://typescriptbook.jp/reference/statements/never#void%E5%9E%8B%E3%81%A8never%E5%9E%8B%E3%81%AE%E9%81%95%E3%81%84
+```javascript
+const obj = {
+  toString() {
+    console.log("fruits");
+    return "red";
+  },
+};
+let fruitsColor = { orange: "orange" };
+fruitsColor[obj] = "purple"; // fruits
+console.log(foo[obj]); // fruits, purple
+```
+
+value に `string` でアクセスが可能で、`Object` を渡すと暗黙的に `string` に変換されて実行されます。
+それに対し配列は数値インデックスで値にアクセスが可能です。オブジェクトには数値でアクセスしても `number` 型のインデックスは振られていないので`undefined`が返されます。
+
+```javascript
+const colors = ["orange", "green", "pink"];
+console.log(colors[0]); // orange
+
+const fruitsColor = {
+  orange: "orange",
+  melon: "green",
+  peach: "pink",
+};
+console.log(fruits[0]); // undefined
+```
+
+## TypeScript のインデックスシグネチャ
+
+TypeScript のインデックスシグネチャは`string`,`number`(または `symbol`)型のいずれかでなければなりません。
+その他の型を渡すとコンパイルエラーになります。
+そして、インデックスシグネチャを明示的に型定義するときは以下のように書くことが可能です。
+
+```typescript
+type SomethingObject = {
+  [key: string]: number;
+};
+let obj: SomethingObject;
+obj = { a: 1, b: 2 }; // OK
+obj.c = 4; // OK
+obj["d"] = 5; // OK
+```
+
+ちなみにユーティリティータイプを使っても同じ型を作ることができます。
+
+```typescript
+type SomethingObject = Record<string, number>;
+```
+
+## Tuple 型や配列を インデックスシグネチャの[number]を使って Union 型にする
+
+[type-challenges](https://github.com/type-challenges/type-challenges)の easy で早速出てくる `Tuple` 型について、一見不思議な書き方に見える type が出てきます。
+
+```typescript
+type Fruits = ["orange", "melon", "peach"];
+type UnionFruits = Fruits[number]; // "orange" | "melon" | "peach"
+
+const directions = ["east", "west", "south", "north"] as const;
+type UnionDirections = typeof directions[number]; // "east" | "west" | "south" | "north"
+```
+
+上記のように`key`に`number`を設定すると、配列の値が全てユニオンされます。上記の`UnionFruits`と`UnionDirections`は、`number`型でアクセスできる値全てをユニオンします。
+配列は`directions[0], directions[1]`という形でインデックスにアクセスできるため上記のような記載が可能になっています。
+ちなみに`Fruits[string]`や`typeof directions[string]`ではコンパイルエラーになります。
+
+---
+
+インデックスシグネチャが調べてみると意外とややこしい仕組みでした。
+
+https://typescript-jp.gitbook.io/deep-dive/type-system/index-signatures
+https://typescriptbook.jp/reference/values-types-variables/object/index-signature
