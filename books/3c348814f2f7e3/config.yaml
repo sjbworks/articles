@@ -1,0 +1,9 @@
+title: "インターネットの話"
+summary: "インターネットとは何なのか？その仕組みや、インターネットを理解する上で必要な要素をまとめて解説しました。\nこの本は、Frontend Developer Roadmap (https://roadmap.sh/frontend) から自分のための教科書を作るために作成したものです。"
+topics: ["internet"]
+published: false
+price: 0 # 有料の場合200〜5000
+# 本に含めるチャプターを順番に並べましょう
+chapters:
+  - example1
+  - example2
