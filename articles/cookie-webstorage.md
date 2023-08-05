@@ -6,10 +6,11 @@ topics: ["web","browser","storage","javascript","html5"]
 published: true
 ---
 
-# Web Storageとは
+# CookieとWeb Storageとは
 
-Web Storageは、ユーザーのローカル環境のブラウザにデータを保存するための仕組みです。
-データの追加・更新・削除などの操作はJavaScript上で行うことができます。
+Cookieは、ウェブサイトがクライアントに対して一時的な情報を保存するための小さなデータの塊です。
+Web Storageも似たような仕組みで、ユーザーのローカル環境のブラウザにデータを保存するための仕組みです。
+データの追加・更新・削除などの操作はJavaScript上で行うことができますが、cookieの更新はサーバーで行うことが一般的です。
 以下はCookieとWeb Storage(Local Storage, Session Storage)の比較表です。
 
 | 種類              | 別タブ/ウィンドウでのデータ共有 | データ容量 | 有効期限             | サーバーへのデータ送信 |
