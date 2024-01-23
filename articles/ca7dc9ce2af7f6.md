@@ -60,6 +60,10 @@ function Child() {
 }
 ```
 
+#### TypeScript: Expression produces a union type that is too complex to represent. ts(2590)
+
+theme をマージするとき、SSR のアプリケーションをビルドすると`複雑すぎて表現できない共用体型を生成します`という型エラーでビルドが失敗する現象に出会いました。
+
 ### MUI のスタイルの優先度
 
 スタイルの優先度は、一般的に CSS のカスケードと同様に、特定性と宣言の順序に基づいています。ただし、MUI では以下の優先度が適用されます（高い順）。
